@@ -1,0 +1,9 @@
+[package]
+name = "calculator"
+version = "0.1.0"
+edition = "2021"
+authors = ["Luka Maljic <luka@maljic.com>"]
+description = "A simple CLI calculator"
+license = "MIT"
+
+[dependencies]
