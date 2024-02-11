@@ -7,3 +7,6 @@ description = "A simple CLI calculator"
 license = "MIT"
 
 [dependencies]
+rust_decimal = { version = "1.34", default-features = false, features = [
+	"std",
+] }
