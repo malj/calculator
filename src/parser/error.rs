@@ -4,6 +4,9 @@ use std::{error, fmt};
 
 #[derive(Debug)]
 pub enum Error {
+	Value(rust_decimal::Error),
+	UninitializedGroup,
+	UnterminatedGroup,
 	UnexpectedOperator(Operator),
 	UnexpectedNode(Node),
 	Empty,
@@ -15,6 +18,9 @@ impl error::Error for Error {}
 impl fmt::Display for Error {
 	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
 		match self {
+			Self::Value(decimal_error) => write!(f, "{decimal_error}"),
+			Self::UninitializedGroup => write!(f, "Error: Unexpected group terminator"),
+			Self::UnterminatedGroup => write!(f, "Error: Unterminated group"),
 			Self::UnexpectedOperator(operator) => {
 				write!(f, "Error: Unexpected {:?} operator", operator)
 			}
