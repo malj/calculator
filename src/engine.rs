@@ -84,3 +84,116 @@ impl TryFrom<Expr> for Decimal {
 		}
 	}
 }
+
+#[cfg(test)]
+mod tests {
+	use super::{Expr, Node};
+	use rust_decimal::Decimal;
+
+	#[test]
+	fn raw() {
+		assert_eq!(Decimal::ONE, Node::Value(Decimal::ONE).try_into().unwrap());
+	}
+
+	#[test]
+	fn add() {
+		assert_eq!(
+			Decimal::TWO,
+			Node::Expr(Expr::Add(Decimal::ONE.into(), Decimal::ONE.into()).into())
+				.try_into()
+				.unwrap()
+		);
+	}
+
+	#[test]
+	fn add_overflow() {
+		let error: Result<Decimal, rust_decimal::Error> =
+			Node::Expr(Expr::Add(Decimal::MAX.into(), Decimal::ONE.into()).into()).try_into();
+		assert_eq!(error, Err(rust_decimal::Error::ExceedsMaximumPossibleValue));
+	}
+
+	#[test]
+	fn sub() {
+		assert_eq!(
+			Decimal::ZERO,
+			Node::Expr(Expr::Sub(Decimal::ONE.into(), Decimal::ONE.into()).into())
+				.try_into()
+				.unwrap()
+		);
+	}
+
+	#[test]
+	fn sub_underflow() {
+		let error: Result<Decimal, rust_decimal::Error> =
+			Node::Expr(Expr::Sub(Decimal::MIN.into(), Decimal::ONE.into()).into()).try_into();
+		assert_eq!(
+			error,
+			Err(rust_decimal::Error::LessThanMinimumPossibleValue)
+		);
+	}
+
+	#[test]
+	fn mul() {
+		assert_eq!(
+			Decimal::ONE,
+			Node::Expr(Expr::Mul(Decimal::ONE.into(), Decimal::ONE.into()).into())
+				.try_into()
+				.unwrap()
+		);
+	}
+
+	#[test]
+	fn mul_overflow() {
+		let error: Result<Decimal, rust_decimal::Error> =
+			Node::Expr(Expr::Mul(Decimal::MAX.into(), Decimal::TWO.into()).into()).try_into();
+		assert_eq!(error, Err(rust_decimal::Error::ExceedsMaximumPossibleValue));
+	}
+
+	#[test]
+	fn mul_underflow() {
+		let error: Result<Decimal, rust_decimal::Error> =
+			Node::Expr(Expr::Mul(Decimal::MIN.into(), Decimal::TWO.into()).into()).try_into();
+		assert_eq!(
+			error,
+			Err(rust_decimal::Error::LessThanMinimumPossibleValue)
+		);
+	}
+
+	#[test]
+	fn div() {
+		assert_eq!(
+			Decimal::ONE,
+			Node::Expr(Expr::Div(Decimal::ONE.into(), Decimal::ONE.into()).into())
+				.try_into()
+				.unwrap()
+		);
+	}
+
+	#[test]
+	fn div_overflow() {
+		let error: Result<Decimal, rust_decimal::Error> =
+			Node::Expr(Expr::Div(Decimal::ONE.into(), Decimal::ZERO.into()).into()).try_into();
+		assert_eq!(error, Err(rust_decimal::Error::ExceedsMaximumPossibleValue));
+	}
+
+	#[test]
+	fn div_underflow() {
+		let error: Result<Decimal, rust_decimal::Error> =
+			Node::Expr(Expr::Div(Decimal::NEGATIVE_ONE.into(), Decimal::ZERO.into()).into())
+				.try_into();
+		assert_eq!(
+			error,
+			Err(rust_decimal::Error::LessThanMinimumPossibleValue)
+		);
+	}
+
+	#[test]
+	fn neg() {
+		assert_eq!(
+			Decimal::NEGATIVE_ONE,
+			Node::Expr(Expr::Neg(Decimal::ONE.into()).into())
+				.try_into()
+				.unwrap()
+		);
+	}
+}
