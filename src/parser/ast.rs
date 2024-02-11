@@ -124,3 +124,75 @@ impl Builder {
 		}
 	}
 }
+
+#[cfg(test)]
+mod tests {
+	use super::{super::tokenizer::Operator, Builder};
+	use crate::engine::Node;
+	use rust_decimal::Decimal;
+
+	#[test]
+	fn add() {
+		let mut builder = Builder::new();
+		builder.add_node(Node::Value(Decimal::ONE)).unwrap();
+		builder.add_operator(Operator::Add).unwrap();
+		builder.add_node(Node::Value(Decimal::ONE)).unwrap();
+		let node = builder.build().unwrap();
+
+		assert_eq!(Decimal::TWO, node.try_into().unwrap());
+	}
+
+	#[test]
+	fn sub() {
+		let mut builder = Builder::new();
+		builder.add_node(Node::Value(Decimal::ONE)).unwrap();
+		builder.add_operator(Operator::Sub).unwrap();
+		builder.add_node(Node::Value(Decimal::ONE)).unwrap();
+		let node = builder.build().unwrap();
+
+		assert_eq!(Decimal::ZERO, node.try_into().unwrap());
+	}
+
+	#[test]
+	fn mul() {
+		let mut builder = Builder::new();
+		builder.add_node(Node::Value(Decimal::ONE)).unwrap();
+		builder.add_operator(Operator::Mul).unwrap();
+		builder.add_node(Node::Value(Decimal::TWO)).unwrap();
+		let node = builder.build().unwrap();
+
+		assert_eq!(Decimal::TWO, node.try_into().unwrap());
+	}
+
+	#[test]
+	fn div() {
+		let mut builder = Builder::new();
+		builder.add_node(Node::Value(Decimal::ONE)).unwrap();
+		builder.add_operator(Operator::Div).unwrap();
+		builder.add_node(Node::Value(Decimal::TWO)).unwrap();
+		let node = builder.build().unwrap();
+
+		assert_eq!(Decimal::new(5, 1), node.try_into().unwrap());
+	}
+
+	#[test]
+	fn neg() {
+		let mut builder = Builder::new();
+		builder.add_operator(Operator::Sub).unwrap();
+		builder.add_node(Node::Value(Decimal::ONE)).unwrap();
+		let node = builder.build().unwrap();
+
+		assert_eq!(Decimal::NEGATIVE_ONE, node.try_into().unwrap());
+	}
+
+	#[test]
+	fn raw() {
+		let mut builder = Builder::new();
+		builder
+			.add_node(Node::Value(Decimal::ONE_THOUSAND))
+			.unwrap();
+		let node = builder.build().unwrap();
+
+		assert_eq!(Decimal::ONE_THOUSAND, node.try_into().unwrap());
+	}
+}
