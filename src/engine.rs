@@ -51,6 +51,7 @@ impl TryFrom<Expr> for Decimal {
 				let rhs = Decimal::try_from(rhs)?;
 				// Can overflow
 				lhs.checked_add(rhs)
+					.map(|n| n.normalize())
 					.ok_or(rust_decimal::Error::ExceedsMaximumPossibleValue)
 			}
 			Expr::Sub(lhs, rhs) => {
@@ -58,27 +59,32 @@ impl TryFrom<Expr> for Decimal {
 				let rhs = Decimal::try_from(rhs)?;
 				// Can underflow
 				lhs.checked_sub(rhs)
+					.map(|n| n.normalize())
 					.ok_or(rust_decimal::Error::LessThanMinimumPossibleValue)
 			}
 			Expr::Mul(lhs, rhs) => {
 				let lhs = Decimal::try_from(lhs)?;
 				let rhs = Decimal::try_from(rhs)?;
-				// Can overflow or undeflow depending on operand signs
-				lhs.checked_mul(rhs).ok_or(if lhs.signum() == rhs.signum() {
-					rust_decimal::Error::ExceedsMaximumPossibleValue
-				} else {
-					rust_decimal::Error::LessThanMinimumPossibleValue
-				})
+				// Can overflow or underflow depending on operand signs
+				lhs.checked_mul(rhs)
+					.map(|n| n.normalize())
+					.ok_or(if lhs.signum() == rhs.signum() {
+						rust_decimal::Error::ExceedsMaximumPossibleValue
+					} else {
+						rust_decimal::Error::LessThanMinimumPossibleValue
+					})
 			}
 			Expr::Div(lhs, rhs) => {
 				let lhs = Decimal::try_from(lhs)?;
 				let rhs = Decimal::try_from(rhs)?;
 				// Can overflow or underflow (division by zero)
-				lhs.checked_div(rhs).ok_or(if lhs >= Decimal::ZERO {
-					rust_decimal::Error::ExceedsMaximumPossibleValue
-				} else {
-					rust_decimal::Error::LessThanMinimumPossibleValue
-				})
+				lhs.checked_div(rhs)
+					.map(|n| n.normalize())
+					.ok_or(if lhs >= Decimal::ZERO {
+						rust_decimal::Error::ExceedsMaximumPossibleValue
+					} else {
+						rust_decimal::Error::LessThanMinimumPossibleValue
+					})
 			}
 			Expr::Neg(value) => Ok(-Decimal::try_from(value)?),
 		}
