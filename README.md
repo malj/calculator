@@ -27,7 +27,7 @@ Build only:
 cargo build --release
 ```
 
-The executable ouput path is `/target/release/calculator`.
+The executable output path is `/target/release/calculator`.
 
 ## Usage
 

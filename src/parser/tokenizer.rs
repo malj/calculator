@@ -19,6 +19,11 @@ pub enum Operator {
 
 /// Split an input string into stream of tokens.
 pub fn tokenize(input: &str) -> impl Iterator<Item = Result<Token, rust_decimal::Error>> + '_ {
+	// Since there are only two classes of tokens (static operators and dynamic values)
+	// static tokens can be used as separators, splitting the input string.
+	// 1. Split the string and separates separators
+	// 2. Format and filter remaining chunks
+	// 3. Identify chunks and map them to a specific token
 	input
 		.split_inclusive(is_separator)
 		.flat_map(|mut chunk| {
@@ -29,6 +34,7 @@ pub fn tokenize(input: &str) -> impl Iterator<Item = Result<Token, rust_decimal:
 			if let Some(c) = chunk.chars().last() {
 				if is_separator(c) {
 					// Separators are split by length (1) because they are single characters.
+					// This part needs to be reworked for longer separators.
 					(chunk, separator) = chunk.split_at(chunk.len() - 1);
 				}
 			}
@@ -66,7 +72,6 @@ fn parse_number(value: &str) -> Result<Decimal, rust_decimal::Error> {
 mod tests {
 	use super::{parse_number, tokenize, Operator, Token};
 	use rust_decimal::Decimal;
-	use std::collections::VecDeque;
 
 	#[test]
 	fn parse_integer() {
