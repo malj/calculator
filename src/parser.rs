@@ -47,41 +47,57 @@ fn parse_tokens(
 #[cfg(test)]
 mod tests {
 	use super::parse;
+	use crate::engine::{Expr, Node};
 	use rust_decimal::Decimal;
 
 	#[test]
 	fn add() {
 		let node = parse("1 + 1").unwrap();
-		assert_eq!(Decimal::TWO, node.try_into().unwrap());
+		assert_eq!(
+			node,
+			Node::Expr(Expr::Add(Node::Value(Decimal::ONE), Node::Value(Decimal::ONE)).into())
+		);
 	}
 
 	#[test]
 	fn sub() {
 		let node = parse("1 - 1").unwrap();
-		assert_eq!(Decimal::ZERO, node.try_into().unwrap());
+		assert_eq!(
+			node,
+			Node::Expr(Expr::Sub(Node::Value(Decimal::ONE), Node::Value(Decimal::ONE)).into())
+		);
 	}
 
 	#[test]
 	fn mul() {
 		let node = parse("1 * 2").unwrap();
-		assert_eq!(Decimal::TWO, node.try_into().unwrap());
+		assert_eq!(
+			node,
+			Node::Expr(Expr::Mul(Node::Value(Decimal::ONE), Node::Value(Decimal::TWO)).into())
+		);
 	}
 
 	#[test]
 	fn div() {
 		let node = parse("1 / 2").unwrap();
-		assert_eq!(Decimal::new(5, 1), node.try_into().unwrap());
+		assert_eq!(
+			node,
+			Node::Expr(Expr::Div(Node::Value(Decimal::ONE), Node::Value(Decimal::TWO)).into())
+		);
 	}
 
 	#[test]
 	fn neg() {
 		let node = parse("-1").unwrap();
-		assert_eq!(Decimal::NEGATIVE_ONE, node.try_into().unwrap());
+		assert_eq!(
+			node,
+			Node::Expr(Expr::Neg(Node::Value(Decimal::ONE)).into())
+		);
 	}
 
 	#[test]
 	fn raw() {
 		let node = parse("1000").unwrap();
-		assert_eq!(Decimal::ONE_THOUSAND, node.try_into().unwrap());
+		assert_eq!(node, Node::Value(Decimal::ONE_THOUSAND));
 	}
 }

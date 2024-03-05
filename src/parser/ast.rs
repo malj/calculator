@@ -128,7 +128,7 @@ impl Builder {
 #[cfg(test)]
 mod tests {
 	use super::{super::tokenizer::Operator, Builder};
-	use crate::engine::Node;
+	use crate::engine::{Expr, Node};
 	use rust_decimal::Decimal;
 
 	#[test]
@@ -139,7 +139,10 @@ mod tests {
 		builder.add_node(Node::Value(Decimal::ONE)).unwrap();
 		let node = builder.build().unwrap();
 
-		assert_eq!(Decimal::TWO, node.try_into().unwrap());
+		assert_eq!(
+			node,
+			Node::Expr(Expr::Add(Node::Value(Decimal::ONE), Node::Value(Decimal::ONE)).into())
+		);
 	}
 
 	#[test]
@@ -150,7 +153,10 @@ mod tests {
 		builder.add_node(Node::Value(Decimal::ONE)).unwrap();
 		let node = builder.build().unwrap();
 
-		assert_eq!(Decimal::ZERO, node.try_into().unwrap());
+		assert_eq!(
+			node,
+			Node::Expr(Expr::Sub(Node::Value(Decimal::ONE), Node::Value(Decimal::ONE)).into())
+		);
 	}
 
 	#[test]
@@ -161,7 +167,10 @@ mod tests {
 		builder.add_node(Node::Value(Decimal::TWO)).unwrap();
 		let node = builder.build().unwrap();
 
-		assert_eq!(Decimal::TWO, node.try_into().unwrap());
+		assert_eq!(
+			node,
+			Node::Expr(Expr::Mul(Node::Value(Decimal::ONE), Node::Value(Decimal::TWO)).into())
+		);
 	}
 
 	#[test]
@@ -172,7 +181,10 @@ mod tests {
 		builder.add_node(Node::Value(Decimal::TWO)).unwrap();
 		let node = builder.build().unwrap();
 
-		assert_eq!(Decimal::new(5, 1), node.try_into().unwrap());
+		assert_eq!(
+			node,
+			Node::Expr(Expr::Div(Node::Value(Decimal::ONE), Node::Value(Decimal::TWO)).into())
+		);
 	}
 
 	#[test]
@@ -182,7 +194,10 @@ mod tests {
 		builder.add_node(Node::Value(Decimal::ONE)).unwrap();
 		let node = builder.build().unwrap();
 
-		assert_eq!(Decimal::NEGATIVE_ONE, node.try_into().unwrap());
+		assert_eq!(
+			node,
+			Node::Expr(Expr::Neg(Node::Value(Decimal::ONE)).into())
+		);
 	}
 
 	#[test]
@@ -193,6 +208,6 @@ mod tests {
 			.unwrap();
 		let node = builder.build().unwrap();
 
-		assert_eq!(Decimal::ONE_THOUSAND, node.try_into().unwrap());
+		assert_eq!(node, Node::Value(Decimal::ONE_THOUSAND));
 	}
 }

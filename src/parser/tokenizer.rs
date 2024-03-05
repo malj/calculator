@@ -88,31 +88,19 @@ mod tests {
 
 	#[test]
 	fn tokenize_input() {
-		let mut tokens = tokenize("(0 + 0) - 0 * 0 / 0").collect::<VecDeque<_>>();
-		assert_eq!(tokens.pop_front().unwrap(), Ok(Token::GroupStart));
-		assert_eq!(tokens.pop_front().unwrap(), Ok(Token::Value(Decimal::ZERO)));
-		assert_eq!(
-			tokens.pop_front().unwrap(),
-			Ok(Token::Operator(Operator::Add))
-		);
-		assert_eq!(tokens.pop_front().unwrap(), Ok(Token::Value(Decimal::ZERO)));
-		assert_eq!(tokens.pop_front().unwrap(), Ok(Token::GroupEnd));
-		assert_eq!(
-			tokens.pop_front().unwrap(),
-			Ok(Token::Operator(Operator::Sub))
-		);
-		assert_eq!(tokens.pop_front().unwrap(), Ok(Token::Value(Decimal::ZERO)));
-		assert_eq!(
-			tokens.pop_front().unwrap(),
-			Ok(Token::Operator(Operator::Mul))
-		);
-		assert_eq!(tokens.pop_front().unwrap(), Ok(Token::Value(Decimal::ZERO)));
-		assert_eq!(
-			tokens.pop_front().unwrap(),
-			Ok(Token::Operator(Operator::Div))
-		);
-		assert_eq!(tokens.pop_front().unwrap(), Ok(Token::Value(Decimal::ZERO)));
-		assert!(tokens.is_empty());
+		let mut tokens = tokenize("(0 + 0) - 0 * 0 / 0");
+		assert_eq!(tokens.next().unwrap(), Ok(Token::GroupStart));
+		assert_eq!(tokens.next().unwrap(), Ok(Token::Value(Decimal::ZERO)));
+		assert_eq!(tokens.next().unwrap(), Ok(Token::Operator(Operator::Add)));
+		assert_eq!(tokens.next().unwrap(), Ok(Token::Value(Decimal::ZERO)));
+		assert_eq!(tokens.next().unwrap(), Ok(Token::GroupEnd));
+		assert_eq!(tokens.next().unwrap(), Ok(Token::Operator(Operator::Sub)));
+		assert_eq!(tokens.next().unwrap(), Ok(Token::Value(Decimal::ZERO)));
+		assert_eq!(tokens.next().unwrap(), Ok(Token::Operator(Operator::Mul)));
+		assert_eq!(tokens.next().unwrap(), Ok(Token::Value(Decimal::ZERO)));
+		assert_eq!(tokens.next().unwrap(), Ok(Token::Operator(Operator::Div)));
+		assert_eq!(tokens.next().unwrap(), Ok(Token::Value(Decimal::ZERO)));
+		assert!(tokens.next().is_none());
 	}
 
 	#[test]
